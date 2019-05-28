@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
+<StackPane minHeight="600.0" minWidth="1020.0" prefHeight="600.0" prefWidth="1020.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.simccs.desktop.ui.login.controller.LoginController">
+  <children>
+    <StackPane>
+      <children>
+        <VBox prefWidth="424.0" spacing="10.0">
+          <children>
+            <WebView fx:id="loginWebView" minHeight="298.0" prefHeight="389.0" prefWidth="763.0" VBox.vgrow="ALWAYS" />
+            <Label fx:id="notificationLabel" alignment="CENTER" contentDisplay="CENTER" focusTraversable="true" prefHeight="49.0" prefWidth="762.999977929685" text="" textAlignment="CENTER" textFill="RED" wrapText="true">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </Label>
+            <GridPane id="loginGridPane" alignment="TOP_CENTER" disable="true" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="0.0" visible="false" VBox.vgrow="NEVER">
+              <children>
+                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="usernameField" promptText="Username" text="" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <PasswordField fx:id="passwordField" promptText="Password" text="" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <RadioButton fx:id="rememberMe" alignment="CENTER_LEFT" contentDisplay="LEFT" mnemonicParsing="false" text="Remember Me" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+                  <font>
+                    <Font size="10.0" fx:id="x2" />
+                  </font>
+                </RadioButton>
+              </children>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="148.0" minWidth="10.0" prefWidth="109.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="228.0" minWidth="10.0" prefWidth="189.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+            </GridPane>
+            <StackPane prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="NEVER">
+              <children>
+                <HBox alignment="CENTER_RIGHT" prefHeight="22.0" prefWidth="211.0" spacing="3.0" StackPane.alignment="CENTER_LEFT">
+                  <children>
+                    <Button fx:id="simccsButton" alignment="CENTER" mnemonicParsing="false" text="SimCCS Editor">
+                                 <HBox.margin>
+                                    <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                                 </HBox.margin></Button>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Hyperlink fx:id="dontHaveAccountLink" font="$x2" text="Don't have account?">
+                      <HBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" fx:id="x1" />
+                      </HBox.margin>
+                    </Hyperlink>
+                    <Label fx:id="loginAuthFailed" text="" HBox.margin="$x1" />
+                    <Button fx:id="loginButton" alignment="CENTER" defaultButton="true" mnemonicParsing="false" text="Login">
+                                 <HBox.margin>
+                                    <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                                 </HBox.margin></Button>
+                  </children>
+                           <StackPane.margin>
+                              <Insets />
+                           </StackPane.margin>
+                </HBox>
+              </children>
+            </StackPane>
+          </children>
+        </VBox>
+      </children>
+    </StackPane>
+  </children>
+  <padding>
+    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+  </padding>
+</StackPane>
