@@ -327,7 +327,7 @@ public class DataInOut {
     }
 
     private static void loadTransport() {
-        String tranportPath = basePath + "/" + dataset + "/Scenarios/" ++ "/Transport/Linear.txt";
+        String tranportPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Transport/Linear.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(tranportPath))) {
             br.readLine();
             String line = br.readLine();
@@ -718,22 +718,33 @@ public class DataInOut {
             newDir.mkdir();
 
             // Collect data.
+            System.out.println("makeShapeFiles: Collecting data...");
             Source[] sources = data.getSources();
+            System.out.println("makeShapeFiles: Collected sources");
             Sink[] sinks = data.getSinks();
+            System.out.println("makeShapeFiles: Collected sinks");
             HashMap<Source, Double> sourceCaptureAmounts = soln.getSourceCaptureAmounts();
+            System.out.println("makeShapeFiles: Collected sourceCaptureAmounts");
             HashMap<Sink, Double> sinkStorageAmounts = soln.getSinkStorageAmounts();
+            System.out.println("makeShapeFiles: Collected sinkStorageAmounts");
             HashMap<Edge, Double> edgeTransportAmounts = soln.getEdgeTransportAmounts();
+            System.out.println("makeShapeFiles: Collected edgeTransportAmounts");
             HashMap<Edge, int[]> graphEdgeRoutes = data.getGraphEdgeRoutes();
+            System.out.println("makeShapeFiles: Collected graphEdgeRoutes");
 
             // Map projection string.
             String projction = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
 
             // Make source shapefiles.
+            System.out.println("Creating EsriPointList");
             EsriPointList sourceList = new EsriPointList();
+            System.out.println("EsriPointList created");
             String[] sourceAttributeNames = {"Id", "X", "Y", "CO2Cptrd", "MxSpply", "PieWdge", "GensUsed", "MaxGens", "ActlCst", "TtlCst", "Name", "Cell#"};
             int[] sourceAttributeDecimals = {0, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0};
             DbfTableModel sourceAttributeTable = new DbfTableModel(sourceAttributeNames.length);   //12
+            System.out.println("makeShapeFiles: Processing sourceAttributeNames...");
             for (int colNum = 0; colNum < sourceAttributeNames.length; colNum++) {
+                System.out.println("makeShapeFiles: Processing source attr column " + colNum);
                 sourceAttributeTable.setColumnName(colNum, sourceAttributeNames[colNum]);
                 sourceAttributeTable.setDecimalCount(colNum, (byte) sourceAttributeDecimals[colNum]);
                 sourceAttributeTable.setLength(colNum, 10);
@@ -744,6 +755,7 @@ public class DataInOut {
                 }
             }
             for (Source src : sources) {
+                System.out.println("Processing source " + src);
                 EsriPoint source = new EsriPoint(data.cellToLatLon(src.getCellNum())[0], data.cellToLatLon(src.getCellNum())[1]);
                 sourceList.add(source);
 
@@ -766,10 +778,13 @@ public class DataInOut {
                 }
 
                 sourceAttributeTable.addRecord(row);
+                System.out.println("Finished processing source " + src);
             }
 
+            System.out.println("Exporting Sources shapefile...");
             EsriShapeExport writeSourceShapefiles = new EsriShapeExport(sourceList, sourceAttributeTable, newDir.toString() + "/Sources");
             writeSourceShapefiles.export();
+            System.out.println("Sources shapefile exported");
             try(PrintWriter out = new PrintWriter( newDir.toString() + "/Sources.prj")){
                 out.println(projction);
             } catch (IOException ioe) {
