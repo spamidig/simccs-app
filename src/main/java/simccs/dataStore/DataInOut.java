@@ -764,15 +764,19 @@ public class DataInOut {
                     float Cost = Float.parseFloat( variable[2] );
                     int vert3 = Integer.parseInt( variable[3] );
                     int vrid = 4;
-                    double dCost = Cost;
                     Edge edg = new Edge( vert1, vert2 );
+                    double dCost = Cost;
+                    /*
+
+
                     nwData.addEdgeTransportAmount( edg, Cost);
                     edgHashmap.put( edg, new int[]{ vert1,  vert2} );
                     edgCostHashmap.put(edg,dCost);
                     data.setGraphEdgeRoutes( edgHashmap );
                     data.setGraphEdgeCosts( edgCostHashmap );
+                    */
                     for (int i = 4; i < variable.length; i++) {
-                        nwData.addEdgeTransportAmount( edg, Cost );
+                        //nwData.addEdgeTransportAmount( edg, Cost );
                         int evr1 = Integer.parseInt( variable[i-1] );
                         int evr2 = Integer.parseInt( variable[i] );
                         Edge epth = new Edge( evr1, evr2 );
