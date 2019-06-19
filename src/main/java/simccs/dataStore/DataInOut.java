@@ -1,5 +1,8 @@
 package simccs.dataStore;
 
+import com.bbn.openmap.dataAccess.shape.*;
+import com.bbn.openmap.omGraphics.OMGraphic;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,13 +10,6 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static simccs.utilities.Utilities.*;
-import com.bbn.openmap.omGraphics.OMGraphic;
-import com.bbn.openmap.dataAccess.shape.EsriPolyline;
-import com.bbn.openmap.dataAccess.shape.EsriPolylineList;
-import com.bbn.openmap.dataAccess.shape.EsriShapeExport;
-import com.bbn.openmap.dataAccess.shape.DbfTableModel;
-import com.bbn.openmap.dataAccess.shape.EsriPoint;
-import com.bbn.openmap.dataAccess.shape.EsriPointList;
 
 /**
  *
@@ -25,6 +21,9 @@ public class DataInOut {
     private static String dataset;
     private static String scenario;
     private static DataStorer data;
+    private static String networkTyp;
+    private static NetworkData nwData;
+    private static File txtFile = null;
 
     public static void loadData(String basePath, String dataset, String scenario, DataStorer data) {
         DataInOut.basePath = basePath;
@@ -327,7 +326,7 @@ public class DataInOut {
     }
 
     private static void loadTransport() {
-        String tranportPath = basePath + "/" + dataset + "/Scenarios/" ++ "/Transport/Linear.txt";
+        String tranportPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Transport/Linear.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(tranportPath))) {
             br.readLine();
             String line = br.readLine();
@@ -480,7 +479,8 @@ public class DataInOut {
     public static void saveShortestPathsNetwork() {
         int[][] shortestPaths = data.getShortestPaths();
         double[] shortestPathCosts = data.getShortestPathCosts();
-
+        networkTyp="Raw";
+        String networkDataPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/";
         String rawPathsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/RawPaths.txt";
 
         Path pathToFile = Paths.get(rawPathsPath);
@@ -508,13 +508,21 @@ public class DataInOut {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+
+        // Create DataStructure for Shapefile based the txtfile
+        loadNetworkData( rawPathsPath, networkTyp );
+        //Load data into txtFile
+        //rawPathsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/";
+        System.out.println( "Calling makeShapeFile in Generate Rawpaths" );
+        makeShapeFiles(networkDataPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile for Rawpaths Done" );
     }
 
     public static void saveDelaunayPairs() {
         HashSet<Edge> delaunayPairs = data.getDelaunayPairs();
 
         String delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/DelaunayPaths.txt";
-
+        networkTyp="Delaunay";
         // Save to file.
         Path pathToFile = Paths.get(delaunayPairsPath);
         try {
@@ -546,6 +554,15 @@ public class DataInOut {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+
+
+        // Create DataStructure for Shapefile based the txtfile
+        loadNetworkData( delaunayPairsPath, networkTyp );
+        //Load data into txtFile
+        delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/";
+        System.out.println( "Calling makeShapeFile in Generate Delaynaypaths" );
+        makeShapeFiles(delaunayPairsPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile for Delaunaypaths Done" );
     }
 
     public static void saveCandidateGraph() {
@@ -553,7 +570,7 @@ public class DataInOut {
         HashMap<Edge, int[]> graphEdgeRoutes = data.getGraphEdgeRoutes();
 
         String candidateNetworkPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/CandidateNetwork.txt";
-
+        networkTyp="Candidate";
         Path pathToFile = Paths.get(candidateNetworkPath);
         try {
             if (!pathToFile.getParent().toFile().exists())
@@ -578,6 +595,235 @@ public class DataInOut {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+
+        // Create DataStructure for Shapefile based the txtfile
+        loadNetworkData( candidateNetworkPath, networkTyp );
+        //Load data into txtFile
+        candidateNetworkPath=basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/";
+        System.out.println( "Calling makeShapeFile in Generate Candidatepaths" );
+        makeShapeFiles(candidateNetworkPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile in for Candidatepaths done" );
+    }
+
+    public static NetworkData loadNetworkData(String txtfilePath, String networkTyp){
+
+        nwData = new NetworkData();
+        double threshold = .000001;
+        String moniker = null;
+// Collect data.
+        Source[] sources = data.getActiveSources();
+        Sink[] sinks = data.getActiveSinks();
+        int[] graphVertices = data.getGraphVertices();
+
+        // Make cell/index maps.
+        HashMap<Source, Integer> sourceCellToIndex = new HashMap<>();
+        HashMap<Integer, Source> sourceIndexToCell = new HashMap<>();
+        HashMap<Sink, Integer> sinkCellToIndex = new HashMap<>();
+        HashMap<Integer, Sink> sinkIndexToCell = new HashMap<>();
+        HashMap<Integer, Integer> vertexCellToIndex = new HashMap<>();
+        HashMap<Integer, Integer> vertexIndexToPCell = new HashMap<>();
+        HashMap<Edge,int[]> edgHashmap = new HashMap<>();
+        HashMap<Edge, Double> edgCostHashmap = new HashMap<>();
+
+        // Initialize cell/index maps.
+        for (int i = 0; i < sources.length; i++) {
+            sourceCellToIndex.put(sources[i], i);
+            sourceIndexToCell.put(i, sources[i]);
+        }
+        for (int i = 0; i < sinks.length; i++) {
+            sinkCellToIndex.put(sinks[i], i);
+            sinkIndexToCell.put(i, sinks[i]);
+        }
+        for (int i = 0; i < graphVertices.length; i++) {
+            vertexCellToIndex.put(graphVertices[i], i);
+            vertexIndexToPCell.put(i, graphVertices[i]);
+        }
+
+        HashMap<String, Double> variableValues = new HashMap<>();
+
+        //File txtFile = null;
+        if ( networkTyp.equals("Raw")) {
+            txtFile =new File(txtfilePath);//+"RawPaths/RawPaths.txt");
+            moniker = "FromCell\tToCell\tCost\tLength";
+        }
+        else if (networkTyp.equals("Delaunay")) {
+            txtFile =new File(txtfilePath);//+"DelaunayNetwork/DelaunayPaths.txt");
+            moniker = "#  Selected node pairs";
+        }
+        else if ( networkTyp.equals("Candidate")) {
+            txtFile =new File(txtfilePath);//+"CandidateNetwork/CandidatePaths.txt");
+            moniker = "Vertex1\tVertex2\tCost\tCellRoute";
+        }
+        //String[] variable;
+        /*
+        for (File f : new File(txtfilePath).listFiles()) {
+
+            if (f.getName().endsWith( ".txt" )) {
+                txtFile = f;
+            }
+        }
+        */
+
+        try (BufferedReader br = new BufferedReader(new FileReader(txtFile))) {
+
+        /*
+        if ( networkTyp = "Raw" ) {
+                moniker = "FromCell\tToCell\tCost\tLength";
+            }
+            else if (networkTyp = "Delaunay") {
+                moniker = "#  Selected node pairs";
+            }
+            else if ( networkTyp = "Candidate") {
+                moniker = "Vertex1\tVertex2\tCost\tCellRoute";
+            }
+
+        */
+            int lncnt=0;
+            String line = br.readLine(); //moniker line
+            lncnt++;
+            //while (!line.equals(moniker)) {
+                line = br.readLine();//Costlines in Raw or Pairlines in Delaunay or Routelines in Candidate
+                lncnt++;
+            //}
+            //line = br.readLine();
+
+            while (!line.equals(null)) {
+                //String[] pathCells = line.split("\\t");
+
+                String[] variable = line.split("\\t");
+
+                if (networkTyp.equals( "Raw" )){
+
+                    String pathLine = br.readLine(); //path line in Raw
+                    String[] pathCells=pathLine.split("\\t" );
+                    lncnt++;
+                    if (lncnt%2==0) {
+                        int FromCell = Integer.parseInt(variable[0]);
+                        int ToCell = Integer.parseInt(variable[1]);
+                        float Cost = Float.parseFloat( variable[2] );
+                        int edgeCount = Integer.parseInt( variable[3] );
+                        System.out.println("From_Cell# "+FromCell+" ToCell# "+ToCell+" Cost " +Cost+" # of Edges "+edgeCount);
+                    }
+                    //System.out.println("From_Cell# "+FromCell+" ToCell# "+ToCell+" Cost " +Cost+" # of Edges "+edgeCount);
+                  // FromCell	ToCell	Cost	Length
+
+                    if (lncnt%2 == 1) {
+                        int len = Integer.parseInt( pathCells[0] );
+                        System.out.println( " #of Cells for this Edge " + len );
+
+
+                        //for (int edc=1; edc < edgeCount; edc++){
+
+                        for (int i = 1; i < len; i++) {
+                            int rvr1 = Integer.parseInt( pathCells[i]);
+                            int rvr2 = Integer.parseInt( pathCells[i+1]);
+
+                            Edge pathEdge = new Edge(rvr1,rvr2);
+                            nwData.addEdgeTransportAmount(pathEdge, 1.0 );
+                            edgHashmap.put(pathEdge,new int[]{rvr1,rvr2});
+                            data.setGraphEdgeRoutes( edgHashmap );
+                            System.out.println( "Added raw edgeTransportAmount for" + i+" of "+len + "for Path Cell Pair: "+ Integer.parseInt(pathCells[i]) +" "+Integer.parseInt(pathCells[i + 1] ));
+                        }
+                        int nwroutelen=nwData.getOpenedEdges().size();
+                        System.out.println( "NWData Route Length ="+nwroutelen );
+                    }
+
+                   //}
+
+                    //line = br.readLine();
+                }
+                else if (networkTyp.equals("Delaunay")){
+                   if (variable[0].equals( "SOURCE" )){
+                         int sourceIndex = Integer.parseInt( variable[1] );}
+                   else if(variable[0].equals( "SINK")) {
+                       int sinkIndex = Integer.parseInt( variable[1] );}
+
+                   if (variable[2].equals( "SOURCE" )){
+                       int sourceIndex = Integer.parseInt( variable[3] );}
+                   else if(variable[2].equals( "SINK")) {
+                       int sinkIndex = Integer.parseInt( variable[3] );}
+
+                    int rvr1 = Integer.parseInt( variable[4]);
+                    int rvr2 = Integer.parseInt( variable[5]);
+
+                    Edge pathEdge = new Edge(rvr1,rvr2);
+                    nwData.addEdgeTransportAmount(pathEdge, 1.0 );
+                    edgHashmap.put(pathEdge,new int[]{rvr1,rvr2});
+                    data.setGraphEdgeRoutes( edgHashmap );
+                    System.out.println("Delaunay Path ("+lncnt +") "+ variable[0]+ variable[1]+" to "+ variable[2]+variable[3]+ " Cells "+ variable[4]+" "+variable[5] );
+                   //nwData.addEdgeTransportAmount(new Edge(Integer.parseInt(variable[4]), Integer.parseInt(variable[5])),1.0);
+                    System.out.println( "Added Delaunay edgeTransportAmount for" + "for Path Cell Pair: "+ Integer.parseInt(variable[4]) +" "+Integer.parseInt(variable[5] ));
+                   //line = br.readLine();
+                }
+                else if (networkTyp.equals("Candidate")) {
+
+                    //variable =  br.readLine().split( "\\t" );
+
+                    int vert1 = Integer.parseInt( variable[0] );
+                    int vert2 = Integer.parseInt( variable[1] );
+                    float Cost = Float.parseFloat( variable[2] );
+                    int vert3 = Integer.parseInt( variable[3] );
+                    int vrid = 4;
+                    double dCost = Cost;
+                    Edge edg = new Edge( vert1, vert2 );
+                    nwData.addEdgeTransportAmount( edg, Cost);
+                    edgHashmap.put( edg, new int[]{ vert1,  vert2} );
+                    edgCostHashmap.put(edg,dCost);
+                    data.setGraphEdgeRoutes( edgHashmap );
+                    data.setGraphEdgeCosts( edgCostHashmap );
+                    for (int i = 4; i < variable.length; i++) {
+                        nwData.addEdgeTransportAmount( edg, Cost );
+                        int evr1 = Integer.parseInt( variable[i-1] );
+                        int evr2 = Integer.parseInt( variable[i] );
+                        Edge epth = new Edge( evr1, evr2 );
+                        //nwData.addEdgeCostComponent( e, data.getEdgeCost( evr1, evr2) );
+                        //data.generateCandidateGraph();
+                        nwData.addEdgeTransportAmount( epth, Cost );
+                        edgHashmap.put( epth, new int[]{ evr1,  evr2} );
+
+                        edgCostHashmap.put(epth, dCost);
+                        data.setGraphEdgeRoutes( edgHashmap );
+                        data.setGraphEdgeCosts(edgCostHashmap);
+                        int dges = data.getGraphEdges().size();
+
+                        System.out.println( "Adding Candidate Edges into NetworkData at " + lncnt + " for " +
+                                 evr1 + " " +  evr2 + " with Cost " + Cost );
+                        int nwroutelen = nwData.getOpenedEdges().size();
+                        System.out.println( "NWData Route Length =" + nwroutelen+ " graphEdge size "+ dges );
+                        //System.out.println( "Adding Candidate Edges into NwtworkData at "+lncnt +" for "+vert1+" "+vert2+"with Cost "+Cost);
+                    }
+
+                /*
+                if (Double.parseDouble(variable[2]) > threshold) {
+                    variableValues.put(variable[0], Double.parseDouble(variable[2]));
+                    String[] components = variable[0].split("\\]\\[|\\[|\\]");
+                    if (components[0].equals("a")) {
+                        nwData.addSourceCaptureAmount(sources[Integer.parseInt(components[1])], Double.parseDouble(variable[2]));
+                    } else if (components[0].equals("b")) {
+                        nwData.addSinkStorageAmount(sinks[Integer.parseInt(components[1])], Double.parseDouble(variable[2]));
+                    } else if (components[0].equals("p")) {
+                        nwData.addEdgeTransportAmount(new Edge(vertexIndexToCell.get(Integer.parseInt(components[1])), vertexIndexToCell.get(Integer.parseInt(components[2]))), Double.parseDouble(variable[2]));
+                    } else if (variable[0].equals("captureTarget")) {
+                        nwData.setTargetCaptureAmountPerYear(Double.parseDouble(variable[2]));
+                    } else if (variable[0].equals("crf")) {
+                        nwData.setCRF(Double.parseDouble(variable[2]));
+                    } else if (variable[0].equals("projectLength")) {
+                        nwData.setProjectLength(Integer.parseInt(variable[2]));
+                    }
+                }
+                line = br.readLine();
+                */
+                }
+                line = br.readLine();
+                if (line == null ) { break;}
+                lncnt++;
+            }
+        }catch (FileNotFoundException fnf){
+           System.out. println( fnf.getMessage() );
+        }catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return nwData;
     }
 
     public static Solution loadSolution(String solutionPath) {
@@ -709,6 +955,11 @@ public class DataInOut {
     private static String[] split(String variable) {
         String[] components = variable.split("\"");
         return new String[]{components[1], components[3], components[5]};
+    }
+
+    private static String[] splito(String variable) {
+        String[] components = variable.split(" ");
+        return components;
     }
 
     public static void makeShapeFiles(String path, Solution soln) {
@@ -874,7 +1125,173 @@ public class DataInOut {
             }
         }
     }
+    public static void makeShapeFiles(String path, String ntyp, NetworkData nwData) { // txtfile for Rawpaths or Delauny or Candidate Network
+        // Make shapefiles if they do not already exist.
+        // remove the fileid and extract base path
 
+        File newDir = new File(path + "/shapeFiles/");
+        if (!newDir.exists()) {
+            newDir.mkdir();
+
+            // Collect data.
+            Source[] sources = data.getSources();
+            Sink[] sinks = data.getSinks();
+            HashMap<Source, Double> sourceCaptureAmounts = nwData.getSourceCaptureAmounts();
+            HashMap<Sink, Double> sinkStorageAmounts = nwData.getSinkStorageAmounts();
+            HashMap<Edge, Double> edgeTransportAmounts = nwData.getEdgeTransportAmounts();
+            HashMap<Edge, int[]> graphEdgeRoutes = data.getGraphEdgeRoutes();
+
+            // Map projection string.
+            String projction = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
+
+            // Make source shapefiles.
+            EsriPointList sourceList = new EsriPointList();
+            String[] sourceAttributeNames = {"Id", "X", "Y", "CO2Cptrd", "MxSpply", "PieWdge", "GensUsed", "MaxGens", "ActlCst", "TtlCst", "Name", "Cell#"};
+            int[] sourceAttributeDecimals = {0, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0};
+            DbfTableModel sourceAttributeTable = new DbfTableModel(sourceAttributeNames.length);   //12
+            for (int colNum = 0; colNum < sourceAttributeNames.length; colNum++) {
+                sourceAttributeTable.setColumnName(colNum, sourceAttributeNames[colNum]);
+                sourceAttributeTable.setDecimalCount(colNum, (byte) sourceAttributeDecimals[colNum]);
+                sourceAttributeTable.setLength(colNum, 10);
+                if (sourceAttributeNames[colNum].equals("Id")) {
+                    sourceAttributeTable.setType(colNum, DbfTableModel.TYPE_CHARACTER);
+                } else {
+                    sourceAttributeTable.setType(colNum, DbfTableModel.TYPE_NUMERIC);
+                }
+            }
+            for (Source src : sources) {
+                EsriPoint source = new EsriPoint(data.cellToLatLon(src.getCellNum())[0], data.cellToLatLon(src.getCellNum())[1]);
+                sourceList.add(source);
+
+                // Add attributes.
+                ArrayList row = new ArrayList();
+                row.add(src.getLabel());
+                row.add(data.cellToLatLon(src.getCellNum())[1]);
+                row.add(data.cellToLatLon(src.getCellNum())[0]);
+                if (sourceCaptureAmounts.containsKey(src)) {
+                    row.add(sourceCaptureAmounts.get(src));
+                    row.add(nwData.getSourceProductionRate().get(src));
+                    row.add(nwData.getSourceProductionRate().get(src) - sourceCaptureAmounts.get(src));
+                } else {
+                    row.add(0);
+                    row.add(src.getProductionRate());
+                    row.add(src.getProductionRate());
+                }
+                for (int i = 0; i < 6; i++) {
+                    row.add(0);
+                }
+
+                sourceAttributeTable.addRecord(row);
+            }
+            System.out.println( "Writing Source Shape Files into "+path+"Sources/Sources.prj" );
+            EsriShapeExport writeSourceShapefiles = new EsriShapeExport(sourceList, sourceAttributeTable, newDir.toString() + "/Sources");
+            writeSourceShapefiles.export();
+            try(PrintWriter out = new PrintWriter( newDir.toString() + "/Sources.prj")){
+                out.println(projction);
+            } catch (IOException ioe) {
+                System.out.println(ioe.getMessage());
+            }
+
+            // Make sink shapefiles.
+            EsriPointList sinkList = new EsriPointList();
+            String[] sinkAttributeNames = {"Id", "X", "Y", "CO2Strd", "MxStrg", "PieWdge", "WllsUsed", "MxWlls", "ActCst", "TtlCst", "Name", "Cell#"};
+            int[] sinkAttributeDecimals = {0, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0};
+            DbfTableModel sinkAttributeTable = new DbfTableModel(sinkAttributeNames.length);   //12
+            for (int colNum = 0; colNum < sinkAttributeNames.length; colNum++) {
+                sinkAttributeTable.setColumnName(colNum, sinkAttributeNames[colNum]);
+                sinkAttributeTable.setDecimalCount(colNum, (byte) sinkAttributeDecimals[colNum]);
+                sinkAttributeTable.setLength(colNum, 10);
+                if (sinkAttributeNames[colNum].equals("Id")) {
+                    sinkAttributeTable.setType(colNum, DbfTableModel.TYPE_CHARACTER);
+                } else {
+                    sinkAttributeTable.setType(colNum, DbfTableModel.TYPE_NUMERIC);
+                }
+            }
+            for (Sink snk : sinks) {
+                EsriPoint source = new EsriPoint(data.cellToLatLon(snk.getCellNum())[0], data.cellToLatLon(snk.getCellNum())[1]);
+                sinkList.add(source);
+
+                // Add attributes.
+                ArrayList row = new ArrayList();
+                row.add(snk.getLabel());
+                row.add(data.cellToLatLon(snk.getCellNum())[1]);
+                row.add(data.cellToLatLon(snk.getCellNum())[0]);
+                if (sinkStorageAmounts.containsKey(snk)) {
+                    row.add(sinkStorageAmounts.get(snk));
+                    row.add(nwData.getSinkCapacity().get(snk) / nwData.getProjectLength());
+                    row.add(nwData.getSinkCapacity().get(snk) / nwData.getProjectLength() - sinkStorageAmounts.get(snk));
+                } else {
+                    row.add(0);
+                    row.add(snk.getCapacity() / nwData.getProjectLength());
+                    row.add(snk.getCapacity() / nwData.getProjectLength());
+                }
+                for (int i = 0; i < 6; i++) {
+                    row.add(0);
+                }
+
+                sinkAttributeTable.addRecord(row);
+            }
+            System.out.println( "Writing Sink Shape Files into "+path+"Sinks/Sinks.prj" );
+            EsriShapeExport writeSinkShapefiles = new EsriShapeExport(sinkList, sinkAttributeTable, newDir.toString() + "/Sinks");
+            writeSinkShapefiles.export();
+            try(PrintWriter out = new PrintWriter( newDir.toString() + "/Sinks.prj")){
+                out.println(projction);
+            } catch (IOException ioe) {
+                System.out.println(ioe.getMessage());
+            }
+
+            // Make network shapefiles.
+            EsriPolylineList edgeList = new EsriPolylineList();
+            String[] edgeAttributeNames = {"Id", "CapID", "CapValue", "Flow", "Cost", "LengKM", "LengROW", "LengCONS", "Variable"};
+            int[] edgeAttributeDecimals = {0, 0, 0, 6, 0, 0, 0, 0, 0};
+            DbfTableModel edgeAttributeTable = new DbfTableModel(edgeAttributeNames.length);   //12
+            for (int colNum = 0; colNum < edgeAttributeNames.length; colNum++) {
+                edgeAttributeTable.setColumnName(colNum, edgeAttributeNames[colNum]);
+                edgeAttributeTable.setDecimalCount(colNum, (byte) edgeAttributeDecimals[colNum]);
+                edgeAttributeTable.setLength(colNum, 10);
+                if (edgeAttributeNames[colNum].equals("Id")) {
+                    edgeAttributeTable.setType(colNum, DbfTableModel.TYPE_CHARACTER);
+                } else {
+                    edgeAttributeTable.setType(colNum, DbfTableModel.TYPE_NUMERIC);
+                }
+            }
+            //System.out.println( "NWData Opened Edges ="+nwData.getOpenedEdges().toString() );
+            for (Edge edg : nwData.getOpenedEdges()) {
+                // Build route
+                int[] route = graphEdgeRoutes.get(edg);
+                System.out.println( "NWData Opened Edges length ="+route.length);
+                double[] routeLatLon = new double[route.length * 2];    // Route cells translated into: lat, lon, lat, lon,...
+                for (int i = 0; i < route.length; i++) {
+                    int cell = route[i];
+                    routeLatLon[i * 2] = data.cellToLatLon(cell)[0];
+                    routeLatLon[i * 2 + 1] = data.cellToLatLon(cell)[1];
+                }
+
+                EsriPolyline edge = new EsriPolyline(routeLatLon, OMGraphic.DECIMAL_DEGREES, OMGraphic.LINETYPE_STRAIGHT);
+                edgeList.add(edge);
+
+                // Add attributes.
+                ArrayList row = new ArrayList();
+                for (int i = 0; i < 3; i++) {
+                    row.add(0);
+                }
+                row.add(edgeTransportAmounts.get(edg));
+                for (int i = 0; i < 5; i++) {
+                    row.add(0);
+                }
+
+                edgeAttributeTable.addRecord(row);
+            }
+            System.out.println( "Writing Network Shape Files into "+path+"Network/Network.prj" );
+            EsriShapeExport writeEdgeShapefiles = new EsriShapeExport(edgeList, edgeAttributeTable, newDir.toString() + "/Network");
+            writeEdgeShapefiles.export();
+            try(PrintWriter out = new PrintWriter( newDir.toString() + "/Network.prj")){
+                out.println(projction);
+            } catch (IOException ioe) {
+                System.out.println(ioe.getMessage());
+            }
+        }
+    }
     public static void dumpSink2Text (String basePath, String dataset, String scenario, String filename){
         String directoryName = basePath + "/" + dataset + "/Scenarios/" + scenario + "/MIP/Uncertainty";
         File directory = new File(String.valueOf(directoryName));

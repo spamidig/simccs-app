@@ -1,15 +1,23 @@
 package simccs.gui;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -23,27 +31,19 @@ import org.simccs.desktop.util.SimCCSContext;
 import org.simccs.desktop.util.messaging.SimCCSEvent;
 import org.simccs.desktop.util.messaging.SimCCSEventBus;
 import simccs.dataStore.*;
+import simccs.solver.MPSWriter;
+import simccs.solver.ProcessUncertainty;
+import simccs.solver.Solver;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipFile;
 
-import javafx.collections.FXCollections;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import simccs.solver.MPSWriter;
-import simccs.solver.ProcessUncertainty;
-import simccs.solver.Solver;
-
-import static simccs.utilities.Utilities.*;
+import static simccs.utilities.Utilities.round;
 
 /**
  *
@@ -276,13 +276,24 @@ public class ControlActions {
 
     public void generateShortestPathsNetwork() {
         if (!Objects.equals(scenario, "")) {
+
             data.generateShortestPaths();
+            String file = "RawPaths.txt";
+            NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/" + file, "Raw");
+            System.out.println( "Calling makeShapeFile in ControlAction for Generate Rawpaths" );
+            DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/","Raw", nwData);
+            System.out.println( "makeShapeFile in ControlAction for Rawpaths Done" );
         }
     }
 
     public void generateCandidateNetwork() {
         if (!Objects.equals(scenario, "")) {
             data.generateCandidateGraph();
+            String file = "CandidateNetwork.txt";
+            NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/" + file, "Candidate");
+            System.out.println( "Calling makeShapeFile in ControlActions to Generate Candidatepaths" );
+            DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/","Candidate", nwData);
+            System.out.println( "makeShapeFile in ControlActions for Candidatepaths done" );
         }
     }
 
