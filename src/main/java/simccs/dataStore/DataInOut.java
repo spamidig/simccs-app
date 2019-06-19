@@ -750,9 +750,9 @@ public class DataInOut {
                     nwData.addEdgeTransportAmount(pathEdge, 1.0 );
                     edgHashmap.put(pathEdge,new int[]{rvr1,rvr2});
                     data.setGraphEdgeRoutes( edgHashmap );
-                    System.out.println("Delaunay Path ("+lncnt +") "+ variable[0]+ variable[1]+" to "+ variable[2]+variable[3]+ " Cells "+ variable[4]+" "+variable[5] );
+                    //System.out.println("Delaunay Path ("+lncnt +") "+ variable[0]+ variable[1]+" to "+ variable[2]+variable[3]+ " Cells "+ variable[4]+" "+variable[5] );
                    //nwData.addEdgeTransportAmount(new Edge(Integer.parseInt(variable[4]), Integer.parseInt(variable[5])),1.0);
-                    System.out.println( "Added Delaunay edgeTransportAmount for" + "for Path Cell Pair: "+ Integer.parseInt(variable[4]) +" "+Integer.parseInt(variable[5] ));
+                   // System.out.println( "Added Delaunay edgeTransportAmount for" + "for Path Cell Pair: "+ Integer.parseInt(variable[4]) +" "+Integer.parseInt(variable[5] ));
                    //line = br.readLine();
                 }
                 else if (networkTyp.equals("Candidate")) {
@@ -790,10 +790,10 @@ public class DataInOut {
                         data.setGraphEdgeCosts(edgCostHashmap);
                         int dges = data.getGraphEdges().size();
 
-                        System.out.println( "Adding Candidate Edges into NetworkData at " + lncnt + " for " +
+                        //System.out.println( "Adding Candidate Edges into NetworkData at " + lncnt + " for " +
                                  evr1 + " " +  evr2 + " with Cost " + Cost );
                         int nwroutelen = nwData.getOpenedEdges().size();
-                        System.out.println( "NWData Route Length =" + nwroutelen+ " graphEdge size "+ dges );
+                        //System.out.println( "NWData Route Length =" + nwroutelen+ " graphEdge size "+ dges );
                         //System.out.println( "Adding Candidate Edges into NwtworkData at "+lncnt +" for "+vert1+" "+vert2+"with Cost "+Cost);
                     }
 
@@ -1263,7 +1263,7 @@ public class DataInOut {
             for (Edge edg : nwData.getOpenedEdges()) {
                 // Build route
                 int[] route = graphEdgeRoutes.get(edg);
-                System.out.println( "NWData Opened Edges length ="+route.length);
+                //System.out.println( "NWData Opened Edges length ="+route.length);
                 double[] routeLatLon = new double[route.length * 2];    // Route cells translated into: lat, lon, lat, lon,...
                 for (int i = 0; i < route.length; i++) {
                     int cell = route[i];

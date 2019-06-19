@@ -280,9 +280,9 @@ public class ControlActions {
             data.generateShortestPaths();
             String file = "RawPaths.txt";
             NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/" + file, "Raw");
-            System.out.println( "Calling makeShapeFile in ControlAction for Generate Rawpaths" );
+            //System.out.println( "Calling makeShapeFile in ControlAction for Generate Rawpaths" );
             DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/","Raw", nwData);
-            System.out.println( "makeShapeFile in ControlAction for Rawpaths Done" );
+            //System.out.println( "makeShapeFile in ControlAction for Rawpaths Done" );
         }
     }
 
@@ -291,9 +291,9 @@ public class ControlActions {
             data.generateCandidateGraph();
             String file = "CandidateNetwork.txt";
             NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/" + file, "Candidate");
-            System.out.println( "Calling makeShapeFile in ControlActions to Generate Candidatepaths" );
+            //System.out.println( "Calling makeShapeFile in ControlActions to Generate Candidatepaths" );
             DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/","Candidate", nwData);
-            System.out.println( "makeShapeFile in ControlActions for Candidatepaths done" );
+            //System.out.println( "makeShapeFile in ControlActions for Candidatepaths done" );
         }
     }
 
