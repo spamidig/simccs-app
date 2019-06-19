@@ -11,7 +11,7 @@
 
     <properties>
         <!-- Airavata version-->
-        <airavata.version>0.17-SNAPSHOT</airavata.version>
+        <airavata.version>0.17</airavata.version>
 
         <!-- Installer Filename without suffix -->
         <!--<app.filename>SimCCSDesktop</app.filename>-->
