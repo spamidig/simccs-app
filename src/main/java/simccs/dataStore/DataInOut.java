@@ -791,7 +791,7 @@ public class DataInOut {
                         int dges = data.getGraphEdges().size();
 
                         //System.out.println( "Adding Candidate Edges into NetworkData at " + lncnt + " for " +
-                                 evr1 + " " +  evr2 + " with Cost " + Cost );
+                                //  evr1 + " " +  evr2 + " with Cost " + Cost );
                         int nwroutelen = nwData.getOpenedEdges().size();
                         //System.out.println( "NWData Route Length =" + nwroutelen+ " graphEdge size "+ dges );
                         //System.out.println( "Adding Candidate Edges into NwtworkData at "+lncnt +" for "+vert1+" "+vert2+"with Cost "+Cost);
