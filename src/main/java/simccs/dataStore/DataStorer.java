@@ -567,7 +567,7 @@ public class DataStorer {
     }
 
     public void makeShapeFiles(String path, Solution soln) {
-        dataInOut.makeGenerateFile(path, soln);
+        dataInOut.makeShapeFiles(path, soln);
     }
 
     public void saveSourceSinkState(String path, DataStorer data) {
