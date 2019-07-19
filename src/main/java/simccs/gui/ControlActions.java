@@ -279,9 +279,9 @@ public class ControlActions {
 
             data.generateShortestPaths();
             String file = "RawPaths.txt";
-            NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/" + file, "Raw");
+            NetworkData nwData = data.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/" + file, "Raw");
             //System.out.println( "Calling makeShapeFile in ControlAction for Generate Rawpaths" );
-            DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/","Raw", nwData);
+            data.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/","Raw", nwData);
             //System.out.println( "makeShapeFile in ControlAction for Rawpaths Done" );
         }
     }
@@ -290,9 +290,9 @@ public class ControlActions {
         if (!Objects.equals(scenario, "")) {
             data.generateCandidateGraph();
             String file = "CandidateNetwork.txt";
-            NetworkData nwData = DataInOut.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/" + file, "Candidate");
+            NetworkData nwData = data.loadNetworkData(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/" + file, "Candidate");
             //System.out.println( "Calling makeShapeFile in ControlActions to Generate Candidatepaths" );
-            DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/","Candidate", nwData);
+            data.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/","Candidate", nwData);
             //System.out.println( "makeShapeFile in ControlActions for Candidatepaths done" );
         }
     }
@@ -304,7 +304,7 @@ public class ControlActions {
     }
 
     public void saveSourceSinkState() {
-        DataInOut.saveSourceSinkState(basePath + "/" + dataset + "/Scenarios/" + scenario, data);
+        data.saveSourceSinkState(basePath + "/" + dataset + "/Scenarios/" + scenario, data);
     }
 
     public void generateMPSFile(String crf, String numYears, String capacityTarget) {
@@ -323,13 +323,13 @@ public class ControlActions {
 
     public void loadSinkUncertainty(String sinkUncertaintyPath) {
         if (!Objects.equals(scenario, "")) {
-            DataInOut.loadSinkUncertainties(sinkUncertaintyPath, data);
+            data.loadSinkUncertainties(sinkUncertaintyPath, data);
         }
     }
 
     public void loadSourceUncertainty(String sourceUncertaintyPath) {
         if (!Objects.equals(scenario, "")) {
-            DataInOut.loadSourceUncertainties(sourceUncertaintyPath, data);
+            data.loadSourceUncertainties(sourceUncertaintyPath, data);
         }
     }
 
@@ -579,7 +579,7 @@ public class ControlActions {
         }
 
         if (file != null && !file.equals("None")) {
-            Solution soln = DataInOut.loadSolution(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file);
+            Solution soln = data.loadSolution(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file);
             HashMap<Edge, int[]> graphEdgeRoutes = data.getGraphEdgeRoutes();
 
             for (Edge e : soln.getOpenedEdges()) {
@@ -680,7 +680,7 @@ public class ControlActions {
             solutionValues[12].setText(Double.toString(round(soln.getUnitTotalCost(), 2)));
 
             // Write to shapefiles.
-            DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file, soln);
+            data.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file, soln);
         } else {
             solutionLayer.getChildren().clear();
         }
@@ -761,7 +761,7 @@ public class ControlActions {
         HashMap<Sink, Integer> sinkPopularity = new HashMap<>();
         HashMap<Edge, Integer> edgePopularity = new HashMap<>();
         for (int i = 0; i < fileNumber; i++) {
-            Solution soln = DataInOut.loadSolution(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file + "/run" + i);
+            Solution soln = data.loadSolution(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file + "/run" + i);
 
             HashMap<Edge, Double> edgeTransportAmounts = soln.getEdgeTransportAmounts();
             HashMap<Source, Double> sourceCaptureAmounts = soln.getSourceCaptureAmounts();
@@ -851,7 +851,7 @@ public class ControlActions {
         }
 
         // Write to shapefiles.
-        DataInOut.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file, aggSoln);
+        data.makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Results/" + file, aggSoln);
     }
 
     public void zippedSolutions(String file) {

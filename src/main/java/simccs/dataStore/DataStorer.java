@@ -18,6 +18,8 @@ public class DataStorer {
 
     private Solver solver;
 
+    private DataInOut dataInOut = new DataInOut();
+
     // Geospatial data.
     private int width;
     private int height;
@@ -95,12 +97,12 @@ public class DataStorer {
         Object[] pathDetails = solver.generateAllPairShortestPaths();
         shortestPaths = (int[][]) pathDetails[0];
         shortestPathCosts = (double[]) pathDetails[1];
-        DataInOut.saveShortestPathsNetwork();
+        dataInOut.saveShortestPathsNetwork();
     }
 
     public void generateDelaunayPairs() {
         delaunayPairs = solver.generateDelaunayPairs();
-        DataInOut.saveDelaunayPairs();
+        dataInOut.saveDelaunayPairs();
     }
 
     public void generateCandidateGraph() {
@@ -110,7 +112,7 @@ public class DataStorer {
         graphVertices = (int[]) graphComponents[0];
         graphEdgeCosts = (HashMap<Edge, Double>) graphComponents[1];
         graphEdgeRoutes = (HashMap<Edge, int[]>) graphComponents[2];
-        DataInOut.saveCandidateGraph();
+        dataInOut.saveCandidateGraph();
 
         // Make right of way and construction costs
         Object[] costComponents = solver.makeComponentCosts();
@@ -120,7 +122,7 @@ public class DataStorer {
 
     public void loadNetworkCosts() {
         if (adjacencyCosts == null) {
-            DataInOut.loadCosts();
+            dataInOut.loadCosts();
 
             // Make right of way and construction costs
             Object[] costComponents = solver.makeComponentCosts();
@@ -552,7 +554,43 @@ public class DataStorer {
         solver = s;
 
         // Load data from files.
-        DataInOut.loadData(basePath, dataset, scenario, this);
+        dataInOut.loadData(basePath, dataset, scenario, this);
         loadNetworkCosts();
+    }
+
+    public NetworkData loadNetworkData(String txtfilePath, String networkTyp){
+        return dataInOut.loadNetworkData(txtfilePath, networkTyp);
+    }
+
+    public void makeShapeFiles(String path, String ntyp, NetworkData nwData) { // txtfile for Rawpaths or Delauny or Candidate Network
+        dataInOut.makeShapeFiles(path, ntyp, nwData);
+    }
+
+    public void makeShapeFiles(String path, Solution soln) {
+        dataInOut.makeGenerateFile(path, soln);
+    }
+
+    public void saveSourceSinkState(String path, DataStorer data) {
+        dataInOut.saveSourceSinkState(path, data);
+    }
+
+    public void loadSinkUncertainties(String sinkUncertaintyPath, DataStorer data) {
+        dataInOut.loadSinkUncertainties(sinkUncertaintyPath, data);
+    }
+
+    public void loadSourceUncertainties(String sourceUncertaintyPath, DataStorer data) {
+        dataInOut.loadSourceUncertainties(sourceUncertaintyPath, data);
+    }
+
+    public Solution loadSolution(String solutionPath) {
+        return dataInOut.loadSolution(solutionPath);
+    }
+
+    public void dumpSink2Text (String basePath, String dataset, String scenario, String filename){
+        dataInOut.dumpSink2Text(basePath, dataset, scenario, filename);
+    }
+
+    public void dumpSource2Text (String basePath, String dataset, String scenario, String filename){
+        dataInOut.dumpSource2Text(basePath, dataset, scenario, filename);
     }
 }

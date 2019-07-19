@@ -290,10 +290,10 @@ public class ProcessUncertainty extends Task<Void> {
             }
             MPSWriter.writeMPS("mip" + i + ".mps", data, Double.parseDouble(crf), Double.parseDouble(numYears), Double.parseDouble(capacityTarget), basePath, dataset, scenario);
             if (sinkExist) {
-                DataInOut.dumpSink2Text(basePath, dataset, scenario, "SampledSinks" + i + ".txt");
+                data.dumpSink2Text(basePath, dataset, scenario, "SampledSinks" + i + ".txt");
             }
             if (sourceExist) {
-                DataInOut.dumpSource2Text(basePath, dataset, scenario, "SampledSources" + i + ".txt");
+                data.dumpSource2Text(basePath, dataset, scenario, "SampledSources" + i + ".txt");
             }
             updateProgress(i, Integer.parseInt(simulationNumber));
         }

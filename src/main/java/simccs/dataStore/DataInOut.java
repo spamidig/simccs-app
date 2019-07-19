@@ -17,19 +17,19 @@ import static simccs.utilities.Utilities.*;
  */
 public class DataInOut {
 
-    private static String basePath;
-    private static String dataset;
-    private static String scenario;
-    private static DataStorer data;
-    private static String networkTyp;
-    private static NetworkData nwData;
-    private static File txtFile = null;
+    private String basePath;
+    private String dataset;
+    private String scenario;
+    private DataStorer data;
+    private String networkTyp;
+    private NetworkData nwData;
+    private File txtFile = null;
 
-    public static void loadData(String basePath, String dataset, String scenario, DataStorer data) {
-        DataInOut.basePath = basePath;
-        DataInOut.dataset = dataset;
-        DataInOut.scenario = scenario;
-        DataInOut.data = data;
+    public void loadData(String basePath, String dataset, String scenario, DataStorer data) {
+        this.basePath = basePath;
+        this.dataset = dataset;
+        this.scenario = scenario;
+        this.data = data;
 
         System.out.println("Loading Geography...");
         loadGeography();
@@ -48,7 +48,7 @@ public class DataInOut {
         System.out.println("Data Loaded.");
     }
 
-    private static void loadGeography() {
+    private void loadGeography() {
         String path = basePath + "/" + dataset + "/BaseData/CostNetwork/Construction Costs.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             br.readLine();
@@ -80,7 +80,7 @@ public class DataInOut {
         }
     }
 
-    public static void loadCosts() {
+    public void loadCosts() {
         String path = basePath + "/" + dataset + "/BaseData/CostNetwork/Construction Costs.txt";
         double[][] adjacencyCosts = new double[0][0];
         double[][] rightOfWayCosts = new double[0][0];
@@ -147,7 +147,7 @@ public class DataInOut {
         data.setRightOfWayCosts(rightOfWayCosts);
     }
 
-    private static void loadSources() {
+    private void loadSources() {
         String sourcePath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Sources/Sources.txt";
         String sourceStatePath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Sources/SourceStates.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(sourcePath))) {
@@ -189,7 +189,7 @@ public class DataInOut {
         }
     }
 
-    private static void loadSinks() {
+    private void loadSinks() {
         String sinkPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Sinks/Sinks.txt";
         String sinkStatePath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Sinks/SinkStates.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(sinkPath))) {
@@ -233,8 +233,8 @@ public class DataInOut {
         }
     }
 
-    public static void loadSinkUncertainties(String sinkUncertaintyPath, DataStorer data) {
-        DataInOut.data = data;
+    public void loadSinkUncertainties(String sinkUncertaintyPath, DataStorer data) {
+        this.data = data;
         try (BufferedReader br = new BufferedReader(new FileReader(sinkUncertaintyPath))) {
             br.readLine();
             String line = br.readLine();
@@ -285,8 +285,8 @@ public class DataInOut {
         }
     }
 
-    public static void loadSourceUncertainties(String sourceUncertaintyPath, DataStorer data) {
-        DataInOut.data = data;
+    public void loadSourceUncertainties(String sourceUncertaintyPath, DataStorer data) {
+        this.data = data;
         try (BufferedReader br = new BufferedReader(new FileReader(sourceUncertaintyPath))) {
             br.readLine();
             String line = br.readLine();
@@ -325,7 +325,7 @@ public class DataInOut {
         }
     }
 
-    private static void loadTransport() {
+    private void loadTransport() {
         String tranportPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Transport/Linear.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(tranportPath))) {
             br.readLine();
@@ -347,7 +347,7 @@ public class DataInOut {
         }
     }
 
-    private static void loadShortestPaths() {
+    private void loadShortestPaths() {
         String rawPathsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/RawPaths.txt";
 
         if (new File(rawPathsPath).exists()) {
@@ -385,7 +385,7 @@ public class DataInOut {
         }
     }
 
-    private static void loadCandidateGraph() {
+    private void loadCandidateGraph() {
         // Check if file exists
         String candidateGraphPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/CandidateNetwork.txt";
         if (new File(candidateGraphPath).exists()) {
@@ -445,7 +445,7 @@ public class DataInOut {
         }
     }
 
-    private static void loadDelaunayPairs() {
+    private void loadDelaunayPairs() {
         // Check if file exists
         String delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/DelaunayPaths.txt";
         if (new File(delaunayPairsPath).exists()) {
@@ -476,7 +476,7 @@ public class DataInOut {
         }
     }
 
-    public static void saveShortestPathsNetwork() {
+    public void saveShortestPathsNetwork() {
         int[][] shortestPaths = data.getShortestPaths();
         double[] shortestPathCosts = data.getShortestPathCosts();
         networkTyp="Raw";
@@ -518,7 +518,7 @@ public class DataInOut {
         System.out.println( "makeShapeFile for Rawpaths Done" );
     }
 
-    public static void saveDelaunayPairs() {
+    public void saveDelaunayPairs() {
         HashSet<Edge> delaunayPairs = data.getDelaunayPairs();
 
         String delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/DelaunayPaths.txt";
@@ -565,7 +565,7 @@ public class DataInOut {
         System.out.println( "makeShapeFile for Delaunaypaths Done" );
     }
 
-    public static void saveCandidateGraph() {
+    public void saveCandidateGraph() {
         HashMap<Edge, Double> graphEdgeCosts = data.getGraphEdgeCosts();
         HashMap<Edge, int[]> graphEdgeRoutes = data.getGraphEdgeRoutes();
 
@@ -605,7 +605,7 @@ public class DataInOut {
         System.out.println( "makeShapeFile in for Candidatepaths done" );
     }
 
-    public static NetworkData loadNetworkData(String txtfilePath, String networkTyp){
+    public NetworkData loadNetworkData(String txtfilePath, String networkTyp){
 
         nwData = new NetworkData();
         double threshold = .000001;
@@ -830,7 +830,7 @@ public class DataInOut {
         return nwData;
     }
 
-    public static Solution loadSolution(String solutionPath) {
+    public Solution loadSolution(String solutionPath) {
         double threshold = .000001;
         Solution soln = new Solution();
 
@@ -956,17 +956,17 @@ public class DataInOut {
         return soln;
     }
 
-    private static String[] split(String variable) {
+    private String[] split(String variable) {
         String[] components = variable.split("\"");
         return new String[]{components[1], components[3], components[5]};
     }
 
-    private static String[] splito(String variable) {
+    private String[] splito(String variable) {
         String[] components = variable.split(" ");
         return components;
     }
 
-    public static void makeShapeFiles(String path, Solution soln) {
+    public void makeShapeFiles(String path, Solution soln) {
         // Make shapefiles if they do not already exist.
         File newDir = new File(path + "/shapeFiles/");
         if (!newDir.exists()) {
@@ -1129,7 +1129,7 @@ public class DataInOut {
             }
         }
     }
-    public static void makeShapeFiles(String path, String ntyp, NetworkData nwData) { // txtfile for Rawpaths or Delauny or Candidate Network
+    public void makeShapeFiles(String path, String ntyp, NetworkData nwData) { // txtfile for Rawpaths or Delauny or Candidate Network
         // Make shapefiles if they do not already exist.
         // remove the fileid and extract base path
 
@@ -1296,7 +1296,7 @@ public class DataInOut {
             }
         }
     }
-    public static void dumpSink2Text (String basePath, String dataset, String scenario, String filename){
+    public void dumpSink2Text (String basePath, String dataset, String scenario, String filename){
         String directoryName = basePath + "/" + dataset + "/Scenarios/" + scenario + "/MIP/Uncertainty";
         File directory = new File(String.valueOf(directoryName));
         if(!directory.exists()){
@@ -1331,7 +1331,7 @@ public class DataInOut {
         }
     }
 
-    public static void dumpSource2Text (String basePath, String dataset, String scenario, String filename){
+    public void dumpSource2Text (String basePath, String dataset, String scenario, String filename){
         String directoryName = basePath + "/" + dataset + "/Scenarios/" + scenario + "/MIP/Uncertainty";
         File directory = new File(String.valueOf(directoryName));
         if(!directory.exists()){
@@ -1363,7 +1363,7 @@ public class DataInOut {
         }
     }
 
-    public static void makeGenerateFile(String path, Solution soln) {
+    public void makeGenerateFile(String path, Solution soln) {
         File newDir = new File(path + "/genFiles");
         if (true) {
             newDir.mkdir();
@@ -1425,7 +1425,7 @@ public class DataInOut {
         }
     }
 
-    public static void saveSourceSinkState(String path, DataStorer data) {
+    public void saveSourceSinkState(String path, DataStorer data) {
         Path sourcePath = Paths.get(path + "/Sources/SourceStates.txt");
         Path sinkPath = Paths.get(path + "/Sinks/SinkStates.txt");
         try {
