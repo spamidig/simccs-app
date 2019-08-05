@@ -510,12 +510,12 @@ public class DataInOut {
         }
 
         // Create DataStructure for Shapefile based the txtfile
-        // loadNetworkData( rawPathsPath, networkTyp );
+        loadNetworkData( rawPathsPath, networkTyp );
         //Load data into txtFile
         //rawPathsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/RawPaths/";
-        // System.out.println( "Calling makeShapeFile in Generate Rawpaths" );
-        // makeShapeFiles(networkDataPath, networkTyp, nwData);
-        // System.out.println( "makeShapeFile for Rawpaths Done" );
+        System.out.println( "Calling makeShapeFile in Generate Rawpaths" );
+        makeShapeFiles(networkDataPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile for Rawpaths Done" );
     }
 
     public void saveDelaunayPairs() {
@@ -557,12 +557,12 @@ public class DataInOut {
 
 
         // Create DataStructure for Shapefile based the txtfile
-        // loadNetworkData( delaunayPairsPath, networkTyp );
+        loadNetworkData( delaunayPairsPath, networkTyp );
         //Load data into txtFile
-        // delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/";
-        // System.out.println( "Calling makeShapeFile in Generate Delaynaypaths" );
-        // makeShapeFiles(delaunayPairsPath, networkTyp, nwData);
-        // System.out.println( "makeShapeFile for Delaunaypaths Done" );
+        delaunayPairsPath = basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/DelaunayNetwork/";
+        System.out.println( "Calling makeShapeFile in Generate Delaynaypaths" );
+        makeShapeFiles(delaunayPairsPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile for Delaunaypaths Done" );
     }
 
     public void saveCandidateGraph() {
@@ -597,12 +597,12 @@ public class DataInOut {
         }
 
         // Create DataStructure for Shapefile based the txtfile
-        // loadNetworkData( candidateNetworkPath, networkTyp );
+        loadNetworkData( candidateNetworkPath, networkTyp );
         //Load data into txtFile
-        // candidateNetworkPath=basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/";
-        // System.out.println( "Calling makeShapeFile in Generate Candidatepaths" );
-        // makeShapeFiles(candidateNetworkPath, networkTyp, nwData);
-        // System.out.println( "makeShapeFile in for Candidatepaths done" );
+        candidateNetworkPath=basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/";
+        System.out.println( "Calling makeShapeFile in Generate Candidatepaths" );
+        makeShapeFiles(candidateNetworkPath, networkTyp, nwData);
+        System.out.println( "makeShapeFile in for Candidatepaths done" );
     }
 
     public NetworkData loadNetworkData(String txtfilePath, String networkTyp){
