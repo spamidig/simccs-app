@@ -570,6 +570,15 @@ public class DataStorer {
         dataInOut.makeShapeFiles(path, soln);
     }
 
+    public void makeCandidateNetworkShapeFiles() {
+        generateCandidateGraph();
+        String file = "CandidateNetwork.txt";
+        NetworkData nwData = loadNetworkData(
+                basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/" + file, "Candidate");
+        makeShapeFiles(basePath + "/" + dataset + "/Scenarios/" + scenario + "/Network/CandidateNetwork/", "Candidate",
+                nwData);
+    }
+
     public void saveSourceSinkState(String path, DataStorer data) {
         dataInOut.saveSourceSinkState(path, data);
     }
