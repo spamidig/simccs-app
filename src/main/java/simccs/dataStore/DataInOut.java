@@ -611,35 +611,9 @@ public class DataInOut {
         double threshold = .000001;
         String moniker = null;
 // Collect data.
-        Source[] sources = data.getActiveSources();
-        Sink[] sinks = data.getActiveSinks();
-        int[] graphVertices = data.getGraphVertices();
 
-        // Make cell/index maps.
-        HashMap<Source, Integer> sourceCellToIndex = new HashMap<>();
-        HashMap<Integer, Source> sourceIndexToCell = new HashMap<>();
-        HashMap<Sink, Integer> sinkCellToIndex = new HashMap<>();
-        HashMap<Integer, Sink> sinkIndexToCell = new HashMap<>();
-        HashMap<Integer, Integer> vertexCellToIndex = new HashMap<>();
-        HashMap<Integer, Integer> vertexIndexToPCell = new HashMap<>();
         HashMap<Edge,int[]> edgHashmap = new HashMap<>();
         HashMap<Edge, Double> edgCostHashmap = new HashMap<>();
-
-        // Initialize cell/index maps.
-        for (int i = 0; i < sources.length; i++) {
-            sourceCellToIndex.put(sources[i], i);
-            sourceIndexToCell.put(i, sources[i]);
-        }
-        for (int i = 0; i < sinks.length; i++) {
-            sinkCellToIndex.put(sinks[i], i);
-            sinkIndexToCell.put(i, sinks[i]);
-        }
-        for (int i = 0; i < graphVertices.length; i++) {
-            vertexCellToIndex.put(graphVertices[i], i);
-            vertexIndexToPCell.put(i, graphVertices[i]);
-        }
-
-        HashMap<String, Double> variableValues = new HashMap<>();
 
         //File txtFile = null;
         if ( networkTyp.equals("Raw")) {
@@ -722,7 +696,7 @@ public class DataInOut {
                             nwData.addEdgeTransportAmount(pathEdge, 1.0 );
                             edgHashmap.put(pathEdge,new int[]{rvr1,rvr2});
                             data.setGraphEdgeRoutes( edgHashmap );
-                            System.out.println( "Added raw edgeTransportAmount for" + i+" of "+len + "for Path Cell Pair: "+ Integer.parseInt(pathCells[i]) +" "+Integer.parseInt(pathCells[i + 1] ));
+                            // System.out.println( "Added raw edgeTransportAmount for" + i+" of "+len + "for Path Cell Pair: "+ Integer.parseInt(pathCells[i]) +" "+Integer.parseInt(pathCells[i + 1] ));
                         }
                         int nwroutelen=nwData.getOpenedEdges().size();
                         System.out.println( "NWData Route Length ="+nwroutelen );
@@ -827,6 +801,8 @@ public class DataInOut {
         }catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        // System.out.println(networkTyp + ": edgHashmap size: " + edgHashmap.size());
+        // System.out.println(networkTyp + ": getNumEdgesOpened=" + nwData.getNumEdgesOpened());
         return nwData;
     }
 
@@ -1259,7 +1235,10 @@ public class DataInOut {
                     edgeAttributeTable.setType(colNum, DbfTableModel.TYPE_NUMERIC);
                 }
             }
-            //System.out.println( "NWData Opened Edges ="+nwData.getOpenedEdges().toString() );
+            // System.out.println( "NWData Opened Edges ="+nwData.getOpenedEdges().toString() );
+            System.out.println( "NWData Opened Edges count = " + nwData.getOpenedEdges().size());
+            // System.out.println("graphEdgeRoutes =" + graphEdgeRoutes.toString());
+            System.out.println("graphEdgeRoutes count = " + graphEdgeRoutes.size());
             for (Edge edg : nwData.getOpenedEdges()) {
                 // Build route
                 int[] route = graphEdgeRoutes.get(edg);
